@@ -1,6 +1,6 @@
 import numpy as np
 import random
-
+from math import gcd
 
 def miller_rabin(n, a): # odd number only
 #find k and q
@@ -219,8 +219,6 @@ print("Done!")
 
     #find g: Integer in[1, ..., p−1]with order p−1 modulo p
 
-from math import gcd
-
 # find the prime factors of p-1
 factors = []
 q = p - 1
@@ -233,6 +231,7 @@ if q > 1:
     factors.append(q)
 
 # find a generator of the group of units modulo p
+'''
 k = 2
 while pow(k, (p-1)//2, p) == 1 or any(pow(k, (p-1)//factor, p) == 1 for factor in factors):
     k = random.randint(2, p-2)
@@ -244,7 +243,9 @@ for factor in factors:
     while h != 1:
         g = (g*h) % p
         h = pow(h, factor, p)
-        
+'''
+g = 2
+
 # print the integer with order p-1 modulo p
 print("Integer with order p-1 modulo p:", g)
 
@@ -278,6 +279,7 @@ alpha_a = random.randint(10**(3-1), 10**3-1)
 alpha_b = random.randint(10**(3-1), 10**3-1)
 
 x = random.randint(10**(3-1), 10**3-1)
+print(x)
 
 print(key_gen(alpha_a, alpha_b, x, g))
 
