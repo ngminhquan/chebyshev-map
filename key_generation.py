@@ -1,6 +1,7 @@
 import numpy as np
 import random
 from math import gcd
+from hash_encrypt import long_to_bytes, bytes_to_long
 
 def miller_rabin(n, a): # odd number only
 #find k and q
@@ -203,55 +204,20 @@ def primetest(n):
         else:
             continue
     return True
-inp = int(input("Nhap so bit cua so prime can tao: "))
+
 # Tìm số nguyên tố lớn p
 while(1):
-    p = random.randrange(pow(2,inp),pow(2,inp+1))
+    p = random.randrange(pow(2,15),pow(2,15+1))
     if primetest(p) == True:
         break
     else:
         continue
 
-print(primetest(p))
-#p = str(hex(p))
-print(p)
-print("Done!")
-
-    #find g: Integer in[1, ..., p−1]with order p−1 modulo p
-
-# find the prime factors of p-1
-factors = []
-q = p - 1
-for i in range(2, int(q**0.5)+1):
-    if q % i == 0:
-        factors.append(i)
-        while q % i == 0:
-            q //= i
-if q > 1:
-    factors.append(q)
-
-# find a generator of the group of units modulo p
-'''
-k = 2
-while pow(k, (p-1)//2, p) == 1 or any(pow(k, (p-1)//factor, p) == 1 for factor in factors):
-    k = random.randint(2, p-2)
-
-# find an integer with order p-1 modulo p
-g = pow(k, (p-1)//2, p)
-for factor in factors:
-    h = pow(k, (p-1)//factor, p)
-    while h != 1:
-        g = (g*h) % p
-        h = pow(h, factor, p)
-'''
+#find g: Integer in[1, ..., p−1]with order p−1 modulo p
 g = 2
 
-# print the integer with order p-1 modulo p
-print("Integer with order p-1 modulo p:", g)
-
-
-    #Chebyshev map
-def chebyshev(g, x):           #x in the value of [-1;1]
+#Chebyshev map
+def chebyshev(g, x):
     A = np.array([[0, 1], [-1, 2*x]])
     T0_1 = [1, x]
     A_g = np.linalg.matrix_power(A, g - 1)
@@ -260,27 +226,31 @@ def chebyshev(g, x):           #x in the value of [-1;1]
 
     return T_g
 
-
-
 #key generation
 '''
 alpha_a and alpha_b: two large integer
 x: random x
 '''
 def key_gen(alpha_a, alpha_b, x, g):
-    Tg_a = chebyshev(pow(g, alpha_a), x)
-    Tg_b = chebyshev(pow(g, alpha_b), x)
-    pu_a = Tg_a % p
-    pu_b = Tg_b % p
+    pu_a = x
+    pu_b = x
+    for i in range(alpha_a):
+        pu_a = chebyshev(g, pu_a) % p
+    for i in range(alpha_b):
+        pu_b = chebyshev(g, pu_b) % p
     return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
 
+def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s modulo p
+    val = x
+    for i in range(s):
+        val = chebyshev(2, val) % p
+    return int(val)
 
-alpha_a = random.randint(10**(3-1), 10**3-1)
-alpha_b = random.randint(10**(3-1), 10**3-1)
+alpha_a = random.randint(10**(6-1), 10**6-1)
+alpha_b = random.randint(10**(6-1), 10**6-1)
 
 x = random.randint(10**(3-1), 10**3-1)
-print(x)
+#print('p: ', p)
+#print('x: ', x)
 
-print(key_gen(alpha_a, alpha_b, x, g))
-
-
+#print(key_gen(alpha_a, alpha_b, x, g))
