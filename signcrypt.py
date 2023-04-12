@@ -41,7 +41,7 @@ class signcryption_scheme(object):
             self.alpha = random.randint(1, self._p - 1)
             if (self._p - 1) % self.alpha != 0:
                 break
-        k = chebyshev_plus(self._pu_b, self._x, self._p)
+        k = chebyshev_plus(self._alpha_a - self.alpha, self._pu_b, self._p)
         k = long_to_bytes(k, 12)
         return k
 
@@ -51,15 +51,15 @@ class signcryption_scheme(object):
         self._k2 = k[2:]
 
         digest = hash_func(message, self._k1)
-        print('dg:', digest)
+        
         r = bytes_to_long(digest)
-
         s = chebyshev_plus(self._alpha_a - self.alpha - r, self._x, self._p)
+
         cp = self.present_encrypt(message)
         return r, s, cp
 
 
-msg = b'minhquan_iotk65_'
+msg = b'minhquan'
 alpha_a = 567040
 pu_a =  21066
 pu_b = 35903

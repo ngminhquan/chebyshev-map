@@ -43,12 +43,13 @@ class unsigncrypt_scheme(object):
     def unsigncrypt(self, cp: bytes):
         #split k into k1 and k2
         k = self.compute_k()
+        
         self._k1 = k[:2]
         self._k2 = k[2:]
 
         #decrypt ciphertext
         msg = self.present_decrypt(cp)
-        
+        print(msg)
         #check hash
         digest = hash_func(msg, self._k1)
         r_new = bytes_to_long(digest)
@@ -58,12 +59,8 @@ class unsigncrypt_scheme(object):
         else:
             return 'INVALID'
 
-#   r       s               cp
-#(28009, 19533, b'"S\x88\x81\xb7\xf0\xb1j')
-
-cp = b'"S\x88\x81\xb7\xf0\xb1j'
-r = 28009
-s = 19533
+cp = b'\xa2W\xaa\xb8\x86\xc3^}'
+r, s = 27904, 39871
 
 alpha_b = 230882
 pu_a = 21066

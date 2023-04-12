@@ -240,7 +240,7 @@ def key_gen(alpha_a, alpha_b, x, g):
         pu_b = chebyshev(g, pu_b) % p
     return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
 
-def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s modulo p
+def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
     val = x
     for i in range(s):
         val = chebyshev(2, val) % p
