@@ -59,13 +59,13 @@ class unsigncrypt_scheme(object):
         else:
             return 'INVALID'
 
-cp = b'\xa2W\xaa\xb8\x86\xc3^}'
-r, s = 27904, 39871
+cp = b'\xcb\xecQ"AP\x8c\xc8'
+r, s = 27904, 393
 
 alpha_b = 230882
-pu_a = 21066
-pu_b = 35903
-p = 46957
+pu_a = 1364
+pu_b = 180
+p = 4229
 
 unsign = unsigncrypt_scheme(alpha_b, pu_a, pu_b, p, r, s)
 

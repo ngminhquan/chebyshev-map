@@ -60,11 +60,11 @@ class signcryption_scheme(object):
 
 
 msg = b'minhquan'
-alpha_a = 567040
-pu_a =  21066
-pu_b = 35903
-x = 842
-p = 46957
+alpha_a = 5432
+pu_a =  1364
+pu_b = 180
+x = 393
+p = 4229
 
 sign = signcryption_scheme(alpha_a, pu_a, pu_b, x, p)
 

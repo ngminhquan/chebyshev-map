@@ -207,7 +207,7 @@ def primetest(n):
 
 # Tìm số nguyên tố lớn p
 while(1):
-    p = random.randrange(pow(2,15),pow(2,15+1))
+    p = random.randrange(pow(2,12),pow(2,12+1))
     if primetest(p) == True:
         break
     else:
@@ -231,13 +231,9 @@ def chebyshev(g, x):
 alpha_a and alpha_b: two large integer
 x: random x
 '''
-def key_gen(alpha_a, alpha_b, x, g):
-    pu_a = x
-    pu_b = x
-    for i in range(alpha_a):
-        pu_a = chebyshev(g, pu_a) % p
-    for i in range(alpha_b):
-        pu_b = chebyshev(g, pu_b) % p
+def key_gen(alpha_a, alpha_b, x):
+    pu_a = chebyshev_plus(alpha_a, x, p)
+    pu_b = chebyshev_plus(alpha_b, x, p)
     return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
 
 def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
@@ -246,11 +242,14 @@ def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
         val = chebyshev(2, val) % p
     return int(val)
 
-alpha_a = random.randint(10**(6-1), 10**6-1)
-alpha_b = random.randint(10**(6-1), 10**6-1)
+alpha_a = random.randint(10**(4-1), 10**4-1)
+alpha_b = random.randint(10**(4-1), 10**4-1)
+alpha_a = 5678
+alpha_b = 5555
 
 x = random.randint(10**(3-1), 10**3-1)
 #print('p: ', p)
 #print('x: ', x)
+#print(key_gen(alpha_a, alpha_b, x))
 
-#print(key_gen(alpha_a, alpha_b, x, g))
+
