@@ -4,6 +4,7 @@ from math import gcd
 from hash_encrypt import long_to_bytes, bytes_to_long
 import random
 import math
+import time
 
 def is_prime(n):
     if n <= 1:
@@ -51,11 +52,42 @@ def key_gen(alpha_a, alpha_b, x):
     pu_b = chebyshev_plus(alpha_b, x, p)
     return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
 
+
+
 def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
     val = x
     for i in range(s):
         val = chebyshev(2, val) % p
     return int(val)
+
+
+def cbs_plus(s, x, p):
+    A = np.array([[0, 1], [-1, 2*x]])
+    T0_1 = np.array([1, x])
+    r = np.array([[1, 0], [0, 1]])
+    A = np.mod(A, p)
+    A2 = np.mod(A@A, p)
+    e = g ** s - 1
+    while e > 0:
+        if e % 2 == 1:
+            r = np.mod(r @ A, p)
+        e >>= 1
+        
+        A = np.mod(A@A, p)
+    
+    T0_1 = np.array([1, x])
+    
+    T = np.mod(r@T0_1, p)
+    T_g = T[1]
+
+    return T_g    
+    
+def key_g(alpha_a, alpha_b, x):
+    pu_a = cbs_plus(alpha_a, x, p)
+    pu_b = cbs_plus(alpha_b, x, p)
+    return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
+
+
 
 alpha_a = random.randint(10**(4-1), 10**4-1)
 alpha_b = random.randint(10**(4-1), 10**4-1)
@@ -67,28 +99,35 @@ x = random.randint(10**(3-1), 10**3-1)
 #print('x: ', x)
 #print(key_gen(alpha_a, alpha_b, x))
 
-def cbs_plus(s, x, p):
-    A = np.array([[0, 1], [-1, 2*x]])
-    T0_1 = np.array([1, x])
-    r = 1
-    A = np.mod(A, p)
-    A2 = np.mod(A@A, p)
-    e = g ** s - 1
-    while e > 0:
-        if e % 2 == 1:
-            r = np.mod(r * A, p)
-        e >>= 1
-        A = np.mod(A@A, p)
-    T = np.mod(r@T0_1, p)
-    T_g = T[1]
+count = 20
+avg = 0
+for i in range(count):
+    start_time = time.time()
+
+    # Đoạn code cần đo thời gian thực thi
     
-    return T_g
+    key_gen(alpha_a, alpha_b, x)
+
+    end_time = time.time()
+
+    duration = end_time - start_time
+    avg += duration
+
+avg /= count
+print("Thời gian chạy cũ: {:.5f} giây".format(avg))
+
+for i in range(count):
+    start_time = time.time()
+
+    # Đoạn code cần đo thời gian thực thi
+    key_g(alpha_a, alpha_b, x)
 
 
+    end_time = time.time()
 
-a = cbs_plus(3, 5, 137)
-b = chebyshev_plus(3, 5, 137)
-c = chebyshev(8, 5)
-print('a',a)
-print('b',b)
-print(c % 137)
+    duration = end_time - start_time
+    avg += duration
+
+avg /= count
+print("Thời gian chạy mới: {:.5f} giây".format(avg))
+
