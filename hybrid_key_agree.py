@@ -4,10 +4,6 @@ from key_generation import chebyshev_plus
 from hash_encrypt import Present, long_to_bytes, bytes_to_long, hash_function
 import time
 
-start_time = time.time()
-
-# Đoạn code cần đo thời gian thực thi
-
 
 #user A send to user B to request:
 '''
@@ -66,7 +62,8 @@ class key_agreement(object):
 
         #find s = chebyshev(alpha_a - k_m - cp, x) mod p
         self._s = chebyshev_plus(self._alpha_a - self._k_m - self._cp_s, self._x, self._p)
-        return self._s, self._cp
+        #return self._s, self._cp
+        return 0
 
     def recover_ssk(self):
         #find ssk' from s and cp
@@ -77,6 +74,8 @@ class key_agreement(object):
         k_m_test = bytes_to_long(k_m_test)
 
         #verify
+        return 0
+        '''
         if k_m_test == self._k_m:
             print('VALID k_m')
             if ssk_new == self.ssk:
@@ -86,6 +85,7 @@ class key_agreement(object):
                 return 'INVALID ssk'
         else:
             return 'INVALID k_m'
+        '''
 
 id_a = b'user_a'
 id_b = b'user_b'
@@ -100,14 +100,25 @@ k_m = bytes_to_long(k_m)
 
 hybrid_key = key_agreement(id_a, id_b, nonce_i, alpha_a, alpha_b, pu_b, x, p, k_m)
 
-a = hybrid_key.verify_user_A()
-b = hybrid_key.gen_ssk()
-c = hybrid_key.recover_ssk()
+count = 100
+avg = 0
+for i in range(count):
+    start_time = time.time()
 
-print(c)
+    # Đoạn code cần đo thời gian thực thi
 
-end_time = time.time()
+    #a = hybrid_key.verify_user_A()
+    b = hybrid_key.gen_ssk()
+    c = hybrid_key.recover_ssk()
 
-duration = end_time - start_time
-print("Thời gian chạy: {:.3f} giây".format(duration))
+    #print(c)
+
+    end_time = time.time()
+
+    duration = end_time - start_time
+    avg += duration
+
+avg /= count
+print(avg)
+print("Thời gian chạy: {:.5f} giây".format(avg))
 
