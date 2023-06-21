@@ -5,7 +5,10 @@ from hash_encrypt import long_to_bytes, bytes_to_long
 import random
 import math
 import time
-
+import sys
+import os
+#sys.set_int_max_str_digits(100000)
+g =2
 def is_prime(n):
     if n <= 1:
         return False
@@ -24,13 +27,7 @@ def generate_random_prime(length):
         if is_prime(num):
             return num
 
-# Example usage
-binary_length = 16  # Specify the length in binary
-p = generate_random_prime(binary_length)
 
-
-#find g: Integer in[1, ..., p−1]with order p−1 modulo p
-g = 2
 
 #Chebyshev map
 def chebyshev(g, x):
@@ -40,7 +37,20 @@ def chebyshev(g, x):
     T = A_g@T0_1
     T_g = T[1]
 
+    return T_g# % p
+
+
+def cbs(g, x, p):
+    A = np.array([[0, 1], [-1, 2*x]])
+    T0_1 = np.array([1, x])
+    A_g = A
+    for i in range(g):
+        A_g = np.mod(A_g@A, p)
+    T = np.mod(A_g@T0_1, p)
+    T_g = T[1]
+
     return T_g
+
 
 #key generation
 '''
@@ -57,56 +67,138 @@ def key_gen(alpha_a, alpha_b, x):
 def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
     val = x
     for i in range(s):
-        val = chebyshev(2, val) % p
+        val = chebyshev(g, val) % p
     return int(val)
 
 
-def cbs_plus(s, x, p):
-    A = np.array([[0, 1], [-1, 2*x]])
-    T0_1 = np.array([1, x])
-    r = np.array([[1, 0], [0, 1]])
-    A = np.mod(A, p)
-    A2 = np.mod(A@A, p)
-    e = g ** s - 1
-    while e > 0:
-        if e % 2 == 1:
-            r = np.mod(r @ A, p)
-        e >>= 1
+
+def Tnm2(n, x, m):
+    if n == 0:
+        return 1
+    elif n == 1:
+        return x % m
+    else:
+        e = n - 1
+        a11, a12, a21, a22 = 1, 0, 0, 1
+        s11, s12, s21, s22 = 0, 1, -1, (2 * x)
         
-        A = np.mod(A@A, p)
+        while e > 1:
+            
+            
+            if e % 2 == 1:
+                t1 = (a11 * s11 + a12 * s21) % m
+                a12 = (a11 * s12 + a12 * s22) % m
+                a11 = t1
+                t2 = (a21 * s11 + a22 * s21) % m
+                a22 = (a21 * s12 + a22 * s22) % m
+                a21 = t2
+                
+            t1 = s11 + s22
+            t2 = s12 * s21
+            s11 = (s11 ** 2 + t2) % m
+            s12 = (s12 * t1) % m
+            s21 = (s21 * t1) % m
+            s22 = (s22 ** 2 + t2) % m
+            e //=2
+        
+        t1 = (a21 * s11 + a22 * s21) % m
+        t2 = (a21 * s12 + a22 * s22) % m
+        return (t1 + t2 * x) % m
+
+
+
+def cbs2(n, x, p):
+    if n == 0:
+        return 1
+    elif n == 1:
+        return x % p
+    elif n % 2 == 0:
+
+        return (2 * cbs2(n // 2, x, p) ** 2 - 1) % p
+    else:
+        return (2 * cbs2((n - 1) // 2, x, p) * cbs2((n + 1) // 2, x, p) - x) %p
     
-    T0_1 = np.array([1, x])
-    
-    T = np.mod(r@T0_1, p)
-    T_g = T[1]
+def MyPowerMod(b,c,q):
+    a = 1
+    str = bin(c)[2:]
+    for i in range(len(str)-1):
+        if str[i] == '1':
+            a = a*b
+        a = (a**2) % q
+        
+    if str[-1] == '1' :
+        a = a*b
 
-    return T_g    
-    
-def key_g(alpha_a, alpha_b, x):
-    pu_a = cbs_plus(alpha_a, x, p)
-    pu_b = cbs_plus(alpha_b, x, p)
-    return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
+    a = a % q
+    return a
+def Chebyshev(p,x,n):
+    if(p%4 != 3):
+        sys.exit
+    if MyPowerMod(x**2 -1,(p-1)//2,p) != 1:
+        sys.exit
+    k = (p+1)//4
+    a = (x  + MyPowerMod(x**2-1,k,p)) % p
+    r0 = pow(2,-1,p) 
+    r1 = MyPowerMod(a,n,p)
+    r2 = pow(r1,-1,p)
+    r = (r0*(r1+r2)) %p
+    return r  
 
 
 
-alpha_a = random.randint(10**(4-1), 10**4-1)
-alpha_b = random.randint(10**(4-1), 10**4-1)
-alpha_a = 5678
-alpha_b = 5555
 
-x = random.randint(10**(3-1), 10**3-1)
+alpha_a = random.randint(2**(6-1), 2**6-1)
+
+x = random.randint(2**(4-1), 2**4-1)
 #print('p: ', p)
 #print('x: ', x)
 #print(key_gen(alpha_a, alpha_b, x))
 
-count = 20
+
+
+# Example usage
+binary_length = 20  # Specify the length in binary
+p = generate_random_prime(binary_length)
+p = 2**521 - 1
+x = 1234567890987654320
+n = 10000000000000000000000000000000000001
+
+
+x = 7**233
+n = 13**178
+p = 97**100 + 528
+
+count = 100
+'''
+
+for i in range(100):
+    avg = 0
+    for i in range(count):
+        start_time = time.time()
+
+        # Đoạn code cần đo thời gian thực thi
+        
+        k2 = cbs3(p, x, n)
+        #k2 = 1
+
+        end_time = time.time()
+
+        duration = end_time - start_time
+        avg += duration
+
+    avg /= count
+    print("Thời gian chạy mới 3: {:.5f} giây".format(avg))
+
+
+
 avg = 0
 for i in range(count):
     start_time = time.time()
 
     # Đoạn code cần đo thời gian thực thi
     
-    key_gen(alpha_a, alpha_b, x)
+    k2 = Tnm2(n, x, p)
+    #k2 = 1
 
     end_time = time.time()
 
@@ -114,14 +206,17 @@ for i in range(count):
     avg += duration
 
 avg /= count
-print("Thời gian chạy cũ: {:.5f} giây".format(avg))
-
+print("Thời gian chạy mới 2: {:.5f} giây".format(avg))
+'''
+'''
+avg = 0
 for i in range(count):
     start_time = time.time()
 
     # Đoạn code cần đo thời gian thực thi
-    key_g(alpha_a, alpha_b, x)
-
+    
+    k2 = cbs2(p, x, n)
+    #k2 = 1
 
     end_time = time.time()
 
@@ -129,5 +224,5 @@ for i in range(count):
     avg += duration
 
 avg /= count
-print("Thời gian chạy mới: {:.5f} giây".format(avg))
-
+print("Thời gian chạy mới 1: {:.5f} giây".format(avg))
+'''

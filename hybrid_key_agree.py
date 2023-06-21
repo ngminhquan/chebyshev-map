@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from key_generation import chebyshev_plus
+from key_generation import chebyshev_plus, Chebyshev
 from hash_encrypt import Present, long_to_bytes, bytes_to_long, hash_function
 import time
 
@@ -74,7 +74,7 @@ class key_agreement(object):
         k_m_test = bytes_to_long(k_m_test)
 
         #verify
-        return 0
+        return ssk_new
         '''
         if k_m_test == self._k_m:
             print('VALID k_m')
@@ -86,7 +86,7 @@ class key_agreement(object):
         else:
             return 'INVALID k_m'
         '''
-
+'''
 id_a = b'user_a'
 id_b = b'user_b'
 nonce_i = b'nonce'
@@ -121,4 +121,88 @@ for i in range(count):
 avg /= count
 print(avg)
 print("Thời gian chạy: {:.5f} giây".format(avg))
+
+'''
+import sys
+import time
+import random
+import string
+from Crypto.Util import number
+import secrets
+
+
+def gen_number(lenght):
+    # Generate a random 128-bit number
+    random_number = secrets.randbits(lenght)
+    return random_number
+
+# Generate a 128-bit number
+
+
+def generate_random_string(length):
+    # Choose from all uppercase letters, lowercase letters, and digits
+    characters = string.ascii_letters + string.digits
+    # Generate a random string of specified length
+    random_string = ''.join(random.choice(characters) for _ in range(length))
+    return random_string
+
+# Generate a random string of length 10
+
+a = input("nhap id A : ")
+b = input("nhap id B : ")
+with open('id.txt','r',encoding='utf-8') as id_file:
+    line = id_file.readlines()
+    temp = 0
+    for i in line:
+        if str(a) == str(b) :
+            temp = 1
+        elif str(a) == str(i[:6]) or str(b) == str(i[:6]):
+            temp += 1
+           
+    if temp != 2:
+        print("denied acesss!")
+        exit()
+    else :
+        print("accepted !")
+a = long_to_bytes(int(a))
+b = long_to_bytes(int(b))
+print("User A send request ")
+time.sleep(2)
+userA = []
+userB = []
+KDC = []
+with open('nonce.txt','w',encoding='utf-8') as nonce_map:
+    nonce = generate_random_string(6)
+    nonce_map.write(nonce+'\n')
+nonce = nonce.encode('utf-8')
+userB.append(a+nonce)
+print('user B trans to KDC')
+time.sleep(2)
+KDC.append(b+a+nonce)
+k_m = hash_function(KDC[0])[:1]
+p = number.getPrime(64)
+x = gen_number(128)
+g = [2,3,11,14]
+g = random.choice(g)
+
+k2_m = hash_function(b+userB[0])[:1]
+
+if k_m == k2_m:
+    print('Km is true!')
+else:
+    print('Invalid')
+    sys.exit
+k_m = bytes_to_long(k_m)
+
+print("choose secret key B")
+time.sleep(2)
+alpha_b = gen_number(20)
+n = g**alpha_b
+pk_b = Chebyshev(p,x,n)
+print("choose secret key A")
+alpha_a = gen_number(20)
+hybrid_key = key_agreement(a, b, nonce, alpha_a, alpha_b, pk_b, x, p, k_m)
+hybrid_key.gen_ssk()
+print("recover ssk")
+print(hybrid_key.recover_ssk())
 
