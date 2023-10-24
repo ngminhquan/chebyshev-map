@@ -150,6 +150,8 @@ def generate_random_string(length):
 
 a = input("nhap id A : ")
 b = input("nhap id B : ")
+
+#verify valid id of user
 with open('id.txt','r',encoding='utf-8') as id_file:
     line = id_file.readlines()
     temp = 0
@@ -158,7 +160,9 @@ with open('id.txt','r',encoding='utf-8') as id_file:
             temp = 1
         elif str(a) == str(i[:6]) or str(b) == str(i[:6]):
             temp += 1
-           
+
+    #user invalid: stop program
+    #user valid: continue        
     if temp != 2:
         print("denied acesss!")
         exit()
@@ -171,22 +175,30 @@ time.sleep(2)
 userA = []
 userB = []
 KDC = []
+
+#generate nonce
 with open('nonce.txt','w',encoding='utf-8') as nonce_map:
     nonce = generate_random_string(6)
     nonce_map.write(nonce+'\n')
 nonce = nonce.encode('utf-8')
+
+#
 userB.append(a+nonce)
 print('user B trans to KDC')
 time.sleep(2)
+
+
+#KDC generate x, p, g and send to valid user
 KDC.append(b+a+nonce)
 k_m = hash_function(KDC[0])[:1]
 p = number.getPrime(64)
 x = gen_number(128)
 g = [2,3,11,14]
 g = random.choice(g)
-
 k2_m = hash_function(b+userB[0])[:1]
 
+
+#verify user
 if k_m == k2_m:
     print('Km is true!')
 else:
@@ -194,6 +206,7 @@ else:
     sys.exit
 k_m = bytes_to_long(k_m)
 
+#secret key and public key of two user
 print("choose secret key B")
 time.sleep(2)
 alpha_b = gen_number(20)
@@ -201,6 +214,8 @@ n = g**alpha_b
 pk_b = Chebyshev(p,x,n)
 print("choose secret key A")
 alpha_a = gen_number(20)
+
+#user b 
 hybrid_key = key_agreement(a, b, nonce, alpha_a, alpha_b, pk_b, x, p, k_m)
 hybrid_key.gen_ssk()
 print("recover ssk")

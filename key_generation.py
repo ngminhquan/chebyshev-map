@@ -62,15 +62,11 @@ def key_gen(alpha_a, alpha_b, x):
     pu_b = chebyshev_plus(alpha_b, x, p)
     return np.array([[alpha_a, pu_a], [alpha_b, pu_b]])
 
-
-
 def chebyshev_plus(s, x, p) -> int:        #chebyshev for g^s(x) modulo p
     val = x
     for i in range(s):
         val = chebyshev(g, val) % p
     return int(val)
-
-
 
 def Tnm2(n, x, m):
     if n == 0:
@@ -105,8 +101,6 @@ def Tnm2(n, x, m):
         t2 = (a21 * s12 + a22 * s22) % m
         return (t1 + t2 * x) % m
 
-
-
 def cbs2(n, x, p):
     if n == 0:
         return 1
@@ -131,7 +125,7 @@ def MyPowerMod(b,c,q):
 
     a = a % q
     return a
-def Chebyshev(p,x,n):
+def Chebyshev(n, x, p):
     if(p%4 != 3):
         sys.exit
     if MyPowerMod(x**2 -1,(p-1)//2,p) != 1:
@@ -150,64 +144,47 @@ def Chebyshev(p,x,n):
 alpha_a = random.randint(2**(6-1), 2**6-1)
 
 x = random.randint(2**(4-1), 2**4-1)
-#print('p: ', p)
-#print('x: ', x)
-#print(key_gen(alpha_a, alpha_b, x))
-
-
 
 # Example usage
-binary_length = 20  # Specify the length in binary
-p = generate_random_prime(binary_length)
+#function Tnm2 and cbs2 are correct
+binary_length = 10  # Specify the length in binary
+#p = generate_random_prime(binary_length)
+#print(p)
 p = 2**521 - 1
 x = 1234567890987654320
-n = 10000000000000000000000000000000000001
+n = 10000
 
-
-x = 7**233
-n = 13**178
-p = 97**100 + 528
+#print(Tnm2(n, x, p))
+#print(cbs2(n, x, p))
 
 count = 100
-'''
-
-for i in range(100):
-    avg = 0
-    for i in range(count):
+avg = 0
+for i in range(count):
         start_time = time.time()
-
         # Đoạn code cần đo thời gian thực thi
-        
-        k2 = cbs3(p, x, n)
-        #k2 = 1
-
+        k1 = cbs2(n, x, p)
         end_time = time.time()
-
         duration = end_time - start_time
         avg += duration
 
-    avg /= count
-    print("Thời gian chạy mới 3: {:.5f} giây".format(avg))
-
-
+avg /= count
+print("Thời gian chạy cbs2: {:.5f} giây".format(avg))
 
 avg = 0
 for i in range(count):
     start_time = time.time()
-
     # Đoạn code cần đo thời gian thực thi
-    
     k2 = Tnm2(n, x, p)
-    #k2 = 1
-
     end_time = time.time()
-
     duration = end_time - start_time
     avg += duration
 
 avg /= count
-print("Thời gian chạy mới 2: {:.5f} giây".format(avg))
-'''
+print("Thời gian chạy Tnm2: {:.5f} giây".format(avg))
+print(k1)
+print(k2)
+#Theo test vector, cbs2 nhanh hơn Tnm2
+#Tùy trường hợp nhé có khi Tnm2 nhanh hơn rất nhiều
 '''
 avg = 0
 for i in range(count):
